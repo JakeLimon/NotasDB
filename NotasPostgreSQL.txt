@@ -1,0 +1,113 @@
+-- Comenzamos desde cero com repaso para ur agregando temas un poco mas avanzados
+-- El tmario comienza con:
+-- Que es una basse de Datos realacional?
+-- Que es el Diagrama Entidad Relacion (DER o ERD en ingles)?
+-- Tipos de Ralaciones
+-- Que es SQL?
+-- Instalar PostgreSQL o MySQL
+-- Tipos de datos en PostgreSQL o MySQL Material de apoyo w3schools.com/sql/default.asp
+-- Crear una Base de Datos
+-- Crar una tabla
+
+CREATE DATABASE Repaso;
+
+-- Crear una tabla, Crar una tabla de personas con los atributos ID, NOMBRE, APELLIDO, TELEFONO (opcional pero agrgar valorpor default), EMAIL(valor unico)
+
+CREATE TABLE personas (
+	id_persona SERIAL PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL,
+	apellido VARCHAR(30) NOT NULL,
+	telefono VARCHAR(10) DEFAULT '0000000000',
+	email VARCHAR(30) UNIQUE
+);
+DROP TABLE personas
+-- Una vez creada la tabla podemos hacer una select para verificarlo
+
+SELECT * FROM personas;
+
+-- Ahora hasta este punto vamos a realizar el famoso CRUD = Create Read Update Delte
+-- Para crear un registro en nuestra tabla podemos hacerlo cirtas maneras pero la mas recomendable por ahora es la siguiente
+
+-- ============================== CREATE ============================================================================
+INSERT INTO personas () VALUES ();
+-- En los parentesis despues del nombre de la tabla idicamos los campos a insertar, este puede ser omitido pero a veces podemos olvidar los campos
+-- Tambien podemos agregar multiples registros
+INSERT INTO personas () VALUES (), (), ();
+-- Vamos separando por comar los parentesis con la data a insertar
+-- Ejemplo de agregar solo un valor, NOTA para los valores string o varchar es ponerlos en comillas simples ''
+-- Tambien como nuestro id persona es autoincrementable podemos omitirlo ya que postgre se encargara de ello
+INSERT INTO personas ( nombre, apellido, telefono, email ) VALUES ('Jason', 'Benito', '5522125466', 'jason.benito@micorreo.com');
+
+-- Insertaremos un valor donde no indicamos el telefonmo y va a tomar el valor po defecto
+INSERT INTO personas ( nombre, apellido, email ) VALUES ('Giovani', 'Benito', 'giovani.benitso@micorreo.com');
+
+-- Ahora vamos a isnertar 3 registros mas pero de manera multiple
+INSERT INTO personas ( nombre, apellido, telefono, email ) 
+			VALUES  ('Alejandro','Bautista', '5534129099', 'alejandro@micorreo.com'),
+					('Jake','Lemon','5567986733','jake@micorreo.com'),
+					('Jymmy','McGill','5598231276','jymmi@micorreo.com');
+					
+					
+-- ======================== READ ========================================================================================================
+--Vamos a leer los datos ya insertados 
+-- Lo basico es pedir que nos muestre toda la informacion con el *
+SELECT * FROM personas;
+-- Queremos los cmapos especificos como nombre apellido solamente
+SELECT nombre, apellido FROM personas;
+-- Seleccionar solamente la columna nombre con un ALIAS llamado apodo
+SELECT nombre AS apodo FROM personas;
+-- Seleccionar nombre apellido pero en una sola columna (concatenar)
+SELECT CONCAT(nombre, ' ',apellido) AS nombre_completo FROM personas;
+-- Seleccionar todo del registro, solamente con el nombre Jason (asi es como podemos filtrar a base de una condicion)
+-- Podemos palicar operadores logicos como Operadores: =, >, <, >=, <=, <>, !=, AND, OR
+SELECT * FROM personas WHERE nombre = 'Jason';
+-- Ahora realizar una consulta de que este ordenado el nombre alfabeticamente
+SELECT * FROM personas ORDER BY(nombre);
+-- Ahora de manera descendente
+SELECT * FROM personas ORDER BY (nombre) DESC; -- ASC para ascendente
+-- Ahora hablemos un poco de las consultas de como filtrar con respecto a lo siguiente
+-- IN: Devuelve verdadero si un valor coincide con cualquier valor en una lista.
+-- BETWEEN: Devuelve verdadero si un valor está entre un rango de valores.
+-- LIKE: Devuelve verdadero si un valor coincide con un patrón.
+-- IS NULL: Devuelve verdadero si un valor es NULL.
+-- NOT: Negar el resultado de otros operadores.
+
+-- Realizar un a consulta usado LIKE BETWEEN
+SELECT * FROM personas WHERE nombre LIKE 'Ja%';
+SELECT * FROM personas WHERE id_persona BETWEEN 1 And 3;
+-- Ahora hacer una consulta con un limite de registros
+SELECT * FROM personas LIMIT 4;
+-- Cuando hagamos una seleccion de GROUP BY es porque queremos saber las partes que se repiten com ejemplo podemos tener un equipo de trrabajo donde el departamento al
+-- que pertenecen se repite pero queremos saber el total de departamentes podemos hacer un select como  
+-- SELECT departamento FROM empleado ORDER BY (departamento);
+-- pero si queremos contas los empleados de cada departamento podemos hacer lo siguiente
+-- SELECT departamento, COUNT(departamento) FROM empleado ORDER BY (departamento);
+-- Tambien tenemos offfset para indicar desde que numero de registro vamos a mostrar el limite de regstros
+SELECT * FROM personas LIMIT 4 OFFSET 1;
+-- Tenemos en la parte de sumar el total de alguna columna, como lo puede ser el total de tiempo en la empresa de los trabajadores en meses
+-- SELECT SUM(tiempo) FROM empleados;
+-- Asi como sumar o contar tambien podemos elminar los registros con la cluasula DISTINCT
+--  Se utiliza para eliminar filas duplicadas de un conjunto de resultados.
+SELECT DISTINCT nombre FROM personas;
+
+--  ================ UPDATE ==========================================================================================================
+-- Una ves que ya creamos y leemos los registros podemos proceder a actualizarlos
+-- NOTA: usando JOIN es una consulta o lectura de datos pero esto requiere un tema en especial junto a relaciones y se veran mas adelante
+
+-- Vamos a agregar un nuevo registro con datos erroneos que vamos a actualizar
+INSERT INTO personas ( nombre, apellido, email ) VALUES ('Eddie', 'Vedder', 'eddie@micorreo.com');
+-- Verificamos que exista el registro
+SELECT * FROM personas WHERE nombre = 'Eddie';
+-- Como no pusimos el telfono tomo el valor por defecto asi que vamos a agregar un nuemero
+UPDATE personas SET telefono = '5599098878' WHERE id_persona = 7;
+-- Como podemos observar es muy sencillo solo necesitamos saber el id o algun campo unico para efectuar el cambio exacto al registro que queremos
+-- Incluso podemos cambiar otros registros siempre y cuando se haga como el ejemplo, ahora vamo a cambiar el correo
+UPDATE personas SET email='vedder@micorreo.com' Where id_persona = 7;
+
+-- Ahora para eliminar un registro es un poco mas delicado ya que podemos eliminar registros no deseados
+-- por ello debemos saber bien los datos unicos de ese registro en este caso por ejemplo de la tabla personas es el id
+-- procederemos a eliminar el id 3 JAMAS OLVIDAR EL WHERE ya que si no lo ponemos podemos borrar toda la tabla CUIDADO!!!!!
+DELETE FROM personas WHERE id_persona = 3;
+-- Verificamos que el registro este eliminado
+SELECT * FROM personas WHERE id_persona = 3; -- No va a regresar regidstros por lo tanto quedo hecho 
+SELECT * FROM personas; -- Verificamos que no eliminamos toda la tabla jajaja
