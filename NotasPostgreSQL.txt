@@ -111,3 +111,65 @@ DELETE FROM personas WHERE id_persona = 3;
 -- Verificamos que el registro este eliminado
 SELECT * FROM personas WHERE id_persona = 3; -- No va a regresar regidstros por lo tanto quedo hecho 
 SELECT * FROM personas; -- Verificamos que no eliminamos toda la tabla jajaja
+
+-- Ahora vamos a realizar las relaciones de tablas en nuestra Base de Datos
+-- para ello debemos tener en cuenta que tenemos varios tipos de relacion las cuales las mas populaers y usadas son
+-- 1 - 1 Uno a uno
+-- 1 - N Uno a muchos
+-- N - N Muchos a muchos(Para este caso debemos tener una tabla auxiliar que una esta relacion)
+
+-- Comenzando con la relacion 1 to 1. Una relación uno a uno en una base de datos relacional se produce cuando un registro o campo principal tiene cero o solo un registro secundario. 
+-- Como ejemplo vamos a aplicar que un trabajador tiene un coche y un coche tiene un trabajador
+-- Para ello podemos guiarnos de nuestro Diagrama ER (ERD)
+-- Primero debemos crear nuestra tabla a la que estara relacionada o tambien podemos crear nuestras tablas y despues podemos modificarlas
+-- Para este ejemplo primero vamos a crear nuestra tabla carro para despues relacionarla con trabajador, el saber de que lado estara realacionado ya sea por parte del trabajador o el coche
+-- dependera de como es mas accesible, tambien con respecto a los requerimientos del proyecto. Para este caso la relaciones estara en el trabajador (la llave foranea o FK)
+-- Nota importante que en este ejemplo es que nuestro auto sera unico asi que algo debera llevar UNIQUE (tener cuidado en la relacion) pero no es un campo obligatorio (osea que puede ser null)
+
+CREATE TABLE coche(
+	id_coche SERIAL PRIMARY KEY,
+	marca VARCHAR(30) NOT NULL,
+	modelo VARCHAR(30) NOT NULL,
+	anio VARCHAR(30) NOT NULL
+);
+
+CREATE TABLE trabajador(
+	id_trabajador SERIAL PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL,
+	apellido VARCHAR(30) NOT NULL,
+	departamento VARCHAR(40) NOT NULL,
+	email VARCHAR(40) DEFAULT 'no_email',
+	id_coche INTEGER REFERENCES coche (id_coche) UNIQUE
+);
+
+-- Asi es como establecemos nuestra relacion uno a uno indicando que tenemos un dato unico en elid del coche, Ahora solo verificamos nuestras tablas
+SELECT * FROM coche;
+SELECT * FROM trabajador;
+
+-- Cambiamos el nombre de la columna por motivo de que necesitamos identificar la llave foranea y cuando realizamos joins el mismo nombre puede ocacionar problemas
+-- y si causa problemas podemos usar un alias para cada columna de cada tabla
+ALTER TABLE trabajador RENAME COLUMN id_coche TO fk_id_coche;
+
+-- Como ejemplo vamos a agregar unos datos sin agregar los id del coche en la tabla trbajador 
+INSERT INTO trabajador ( nombre, apellido, departamento, email ) VALUES ('Jason', 'Limon', 'Software', 'jason.limon@micorreo.com');
+INSERT INTO trabajador ( nombre, apellido, departamento, email ) VALUES ('Giovani', 'Benito', 'QA', 'gio@micorreo.com');
+INSERT INTO trabajador ( nombre, apellido, departamento ) VALUES ('Jair', 'Limon', 'Software');
+INSERT INTO trabajador ( nombre, apellido, departamento, email ) VALUES ('Jimmy', 'McGil', 'Abogado', 'jimmy@micorreo.com');
+
+-- Ahora vamos a crear autos para poder asignarlos a nuestros trabajadores para ello solo agregaremos 3 coches nada mas
+INSERT INTO coche ( marca, modelo, anio ) VALUES ( 'KIA', 'RIO', '2022' );
+INSERT INTO coche ( marca, modelo, anio ) VALUES ( 'Nissan', 'Tiida', '2011' );
+INSERT INTO coche ( marca, modelo, anio ) VALUES ( 'SEAT', 'Arona', '2022' );
+
+-- Ahora vamos a asignarlos de la siguiente manera
+--  KIA = Jason, Tiida = Jair, SEAT = Giovani
+-- Lo haremos actualizando la tabla
+UPDATE trabajador SET fk_id_coche = 1 WHERE id_trabajador = 1 AND nombre = 'Jason'; -- Puse una condicion extra para poder asegurar el usuario
+UPDATE trabajador SET fk_id_coche = 2 WHERE id_trabajador = 3 AND nombre = 'Jair';
+UPDATE trabajador SET fk_id_coche = 3 WHERE id_trabajador = 2 AND nombre = 'Giovani';
+-- Como pudimos observar tenemos todo de manera correcta ya que si intentamos agregar un valor que no existe en nuestra tabla relacionada (coche) mandara error
+-- supongamos que queremos asignar un coche 4 pero no tenemos y ese coche es al trabajador que nos hace falta asignarle un coche
+UPDATE trabajador SET fk_id_coche = 4 WHERE id_trabajador = 4 AND nombre = 'Jimmy'; -- Manda error de que se no se puede por la llave foranea
+-- En el siguiente ejemplo podemos ver otro error ya que indicamos que cada coche pertenece solo a un trabajador y no queremos duplicados
+UPDATE trabajador SET fk_id_coche = 1 WHERE id_trabajador = 4 AND nombre = 'Jimmy'; -- Error de restriccion unica
+
