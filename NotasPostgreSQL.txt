@@ -173,3 +173,53 @@ UPDATE trabajador SET fk_id_coche = 4 WHERE id_trabajador = 4 AND nombre = 'Jimm
 -- En el siguiente ejemplo podemos ver otro error ya que indicamos que cada coche pertenece solo a un trabajador y no queremos duplicados
 UPDATE trabajador SET fk_id_coche = 1 WHERE id_trabajador = 4 AND nombre = 'Jimmy'; -- Error de restriccion unica
 
+
+
+
+SELECT * FROM pedido;
+SELECT * FROM usuario;
+
+-- Bueno por motivos de actualizacion de windows no pude subir los apuntes anteriores solo es de como se declara la relacion uno a muchos
+-- asi que vamos de nuevo con las tablas pedido y usuario que 
+-- un suario puede tener uno o muchos pedidos
+-- y uno o muchos pedidos puede tener un usuario
+-- La tabla pedido tendra id, folio del pedido, contenido, fecha timestamp 
+-- la tabla usuario solo tendra nombre, apellido, edad y un email
+-- La cardinalidad se deja a tu consideracion como parte del aprendizaje
+-- Tambien puedes crear primero las tablas y luego agregar las llaver foraneas etc como te sea mas comodo
+
+-- Bueno comezamos
+
+CREATE TABLE usuario (
+	id_usuario SERIAL PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL,
+	apellido VARCHAR(30) NOT NULL,
+	edad INTEGER NOT NULL,
+	email VARCHAR(30)
+);
+
+CREATE TABLE pedido (
+	id_pedido SERIAL PRIMARY KEY,
+	folio_pedido VARCHAR(6) NOT NULL,
+	contenido VARCHAR(300) NOT NULL,
+	fechar TIMESTAMP NOT NULL,
+	usuario_id INTEGER REFERENCES usuario (id_usuario)
+);
+
+alter table pedido RENAME COLUMN fechar TO fecha;
+
+INSERT INTO usuario (nombre, apellido, edad, email) VALUES ('Jason', 'Limon', 26, 'jason.limon@micorreo.com');
+INSERT INTO usuario (nombre, apellido, edad, email) VALUES ('Mauricio', 'Limon', 20, 'mauricio.limon@micorreo.com');
+
+INSERT INTO pedido (folio_pedido, contenido, fecha) VALUES ('123999','PLAY STATION 5', CURRENT_TIMESTAMP);
+INSERT INTO pedido (folio_pedido, contenido, fecha) VALUES ('123888','FUNKO POP', CURRENT_TIMESTAMP);
+INSERT INTO pedido (folio_pedido, contenido, fecha) VALUES ('123777','MACBOOK PRO', CURRENT_TIMESTAMP);
+INSERT INTO pedido (folio_pedido, contenido, fecha) VALUES ('123666','ECHO DOT AMAZON ALEXA', CURRENT_TIMESTAMP);
+INSERT INTO pedido (folio_pedido, contenido, fecha) VALUES ('123555','LEGOS MARIOBROS', CURRENT_TIMESTAMP);
+
+
+UPDATE pedido SET usuario_id = 2 WHERE id_pedido = 1;
+UPDATE pedido SET usuario_id = 2 WHERE id_pedido = 2;
+UPDATE pedido SET usuario_id = 1 WHERE id_pedido = 3;
+UPDATE pedido SET usuario_id = 1 WHERE id_pedido = 4;
+UPDATE pedido SET usuario_id = 2 WHERE id_pedido = 5;
