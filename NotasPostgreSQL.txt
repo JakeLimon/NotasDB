@@ -223,3 +223,105 @@ UPDATE pedido SET usuario_id = 2 WHERE id_pedido = 2;
 UPDATE pedido SET usuario_id = 1 WHERE id_pedido = 3;
 UPDATE pedido SET usuario_id = 1 WHERE id_pedido = 4;
 UPDATE pedido SET usuario_id = 2 WHERE id_pedido = 5;
+
+
+
+
+SELECT * FROM pedido;
+SELECT * FROM usuario;
+
+-- Bueno por motivos de actualizacion de windows no pude subir los apuntes anteriores solo es de como se declara la relacion uno a muchos
+-- asi que vamos de nuevo con las tablas pedido y usuario que 
+-- un suario puede tener uno o muchos pedidos
+-- y uno o muchos pedidos puede tener un usuario
+-- La tabla pedido tendra id, folio del pedido, contenido, fecha timestamp 
+-- la tabla usuario solo tendra nombre, apellido, edad y un email
+-- La cardinalidad se deja a tu consideracion como parte del aprendizaje
+-- Tambien puedes crear primero las tablas y luego agregar las llaver foraneas etc como te sea mas comodo
+
+-- Bueno comezamos
+
+CREATE TABLE usuario (
+	id_usuario SERIAL PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL,
+	apellido VARCHAR(30) NOT NULL,
+	edad INTEGER NOT NULL,
+	email VARCHAR(30)
+);
+
+CREATE TABLE pedido (
+	id_pedido SERIAL PRIMARY KEY,
+	folio_pedido VARCHAR(6) NOT NULL,
+	contenido VARCHAR(300) NOT NULL,
+	fechar TIMESTAMP NOT NULL,
+	usuario_id INTEGER REFERENCES usuario (id_usuario)
+);
+
+alter table pedido RENAME COLUMN fechar TO fecha;
+
+INSERT INTO usuario (nombre, apellido, edad, email) VALUES ('Jason', 'Limon', 26, 'jason.limon@micorreo.com');
+INSERT INTO usuario (nombre, apellido, edad, email) VALUES ('Mauricio', 'Limon', 20, 'mauricio.limon@micorreo.com');
+
+INSERT INTO pedido (folio_pedido, contenido, fecha) VALUES ('123999','PLAY STATION 5', CURRENT_TIMESTAMP);
+INSERT INTO pedido (folio_pedido, contenido, fecha) VALUES ('123888','FUNKO POP', CURRENT_TIMESTAMP);
+INSERT INTO pedido (folio_pedido, contenido, fecha) VALUES ('123777','MACBOOK PRO', CURRENT_TIMESTAMP);
+INSERT INTO pedido (folio_pedido, contenido, fecha) VALUES ('123666','ECHO DOT AMAZON ALEXA', CURRENT_TIMESTAMP);
+INSERT INTO pedido (folio_pedido, contenido, fecha) VALUES ('123555','LEGOS MARIOBROS', CURRENT_TIMESTAMP);
+
+
+UPDATE pedido SET usuario_id = 2 WHERE id_pedido = 1;
+UPDATE pedido SET usuario_id = 2 WHERE id_pedido = 2;
+UPDATE pedido SET usuario_id = 1 WHERE id_pedido = 3;
+UPDATE pedido SET usuario_id = 1 WHERE id_pedido = 4;
+UPDATE pedido SET usuario_id = 2 WHERE id_pedido = 5;
+
+
+-- Ahora como por ultimo vamos a aprender la realcion muchos a muchos donde vamos a necesitar de una tabla extra para poder realizar
+-- la relacion
+-- Para este ejemplo vamos usar el ejemplo de Provedor -- Producto
+-- Un producto tiene muchos proveedores
+-- y muchos proveedors tienen muchos productos
+
+-- Tambien pueden apoyarte con la relacion maestro almno
+-- un maestro tiene muehcos alumnos pero muchos alumno pueden tener muchos maestros
+
+SELECT * FROM profesor;
+SELECT * FROM alumno;
+
+CREATE TABLE profesor (
+	id_profesor SERIAL PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL,
+	materia VARCHAR(30) NOT NULL,
+	edificio CHAR(1) NOT NULL
+);
+CREATE TABLE alumno(
+	id_alumno SERIAL PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL,
+	grupo VARCHAR(5) NOT NULL,
+	email VARCHAR(20)
+);
+
+-- Ya tenemos las tablas que se van a relacionar, asi que ahora vamos a necesitar una tabla auxiliar para la relacion
+-- llamaremos a esta tabla profesor_alumno asi que nuestra lacion queda de la siguiente manera
+-- Profesor ----- profesor_alumno ----- Alumno
+--         N    1                1     N
+
+CREATE TABLE profesor_alumno(
+	id_profesor_alumno SERIAL PRIMARY KEY,
+	id_profesor_fk INTEGER REFERENCES profesor (id_profesor),
+	id_alumno_fk INTEGER REFERENCES alumno (id_alumno)
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
