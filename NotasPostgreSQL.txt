@@ -122,9 +122,11 @@ SELECT * FROM personas; -- Verificamos que no eliminamos toda la tabla jajaja
 -- Como ejemplo vamos a aplicar que un trabajador tiene un coche y un coche tiene un trabajador
 -- Para ello podemos guiarnos de nuestro Diagrama ER (ERD)
 -- Primero debemos crear nuestra tabla a la que estara relacionada o tambien podemos crear nuestras tablas y despues podemos modificarlas
--- Para este ejemplo primero vamos a crear nuestra tabla carro para despues relacionarla con trabajador, el saber de que lado estara realacionado ya sea por parte del trabajador o el coche
+-- Para este ejemplo primero vamos a crear nuestra tabla carro para despues relacionarla con trabajador, el saber de que lado estara realacionado ya sea por parte del trabajador 
+-- o el coche
 -- dependera de como es mas accesible, tambien con respecto a los requerimientos del proyecto. Para este caso la relaciones estara en el trabajador (la llave foranea o FK)
--- Nota importante que en este ejemplo es que nuestro auto sera unico asi que algo debera llevar UNIQUE (tener cuidado en la relacion) pero no es un campo obligatorio (osea que puede ser null)
+-- Nota importante que en este ejemplo es que nuestro auto sera unico asi que algo debera llevar UNIQUE (tener cuidado en la relacion) 
+-- pero no es un campo obligatorio (osea que puede ser null)
 
 CREATE TABLE coche(
 	id_coche SERIAL PRIMARY KEY,
@@ -315,13 +317,171 @@ CREATE TABLE profesor_alumno(
 
 
 
+-- Ahora vamos a insertar los datos de cada alumno y maestro y usando la tabla de la union para muchos a muchos
+
+SELECT * FROM profesor_alumno;
+SELECT * FROM profesor;
+SELECT * FROM alumno;
+
+INSERT INTO profesor_alumno (id_profesor_fk, id_alumno_fk) VALUES (4, 1);
+INSERT INTO profesor_alumno (id_profesor_fk, id_alumno_fk) VALUES (2, 3);
+INSERT INTO profesor_alumno (id_profesor_fk, id_alumno_fk) VALUES (1, 3);
+INSERT INTO profesor_alumno (id_profesor_fk, id_alumno_fk) VALUES (1, 4);
+
+
+SELECT al.nombre, al.grupo, pr.nombre as nombre_profesor, pr.materia, pr.edificio FROM alumno as al 
+INNER JOIN profesor_alumno as pa ON pa.id_alumno_fk = al.id_alumno
+INNER JOIN profesor as pr ON pa.id_profesor_fk = pr.id_profesor;
+
+-- alumno = nombre, grupo
+-- profesor = nombre, materia, edificio
+
+-- Este ejemplo fue muy rapido para comprender las consultas entre varias tablas
+
+-- El truco aqui es ir usando las llaves foraneas y primarias para ir uniendo las tablas y asi poder llegar a nuestro destino
+-- tambien es necesario ponerle un identificador a cada tabla para no colicionar el mismo nombre de las columnas en otras columnas de otras tablas
+-- El alias para las columnas si tienes un espacio ponerlo en comillas dobles " "s
+
+-- No olvidar que para valores de tipo Caracter String Varchar etc al insertar se ponen en comillas simples ''
+
+
+-- ***************************************************************************************************************************************************************
+-- ***************************************************************************************************************************************************************
+-- ****************************************     AHORA VAMOSA REPASAR LO APRENDIDO      ***************************************************************************
+-- ***************************************************************************************************************************************************************
+-- ***************************************************************************************************************************************************************
+
+-- Ahora vamos a aplicar todo lo aprendido y como primer paso vamos a crear las relaciones desde
+-- 1 a 1
+-- 1 a N
+-- N a N
+-- Para la relacion uno a uno usar, producto --- codigo de barras
+-- Para la relacion de uno a muchos, usuario --- pedidos
+-- Al final usar la relacion muchos a muchos, alumnos --- profesores
+-- Posterior a esto vamos a aprender los inner join
+
+--  ************************ 1 --- 1 ******************************************************
+
+CREATE TABLE producto(
+	id_producto SERIAL PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL,
+	precio DECIMAL(5,2) NOT NULL
+);
+
+CREATE TABLE codigo_de_barras(
+	id_codigo_barras SERIAL PRIMARY KEY,
+	codigo VARCHAR(10) NOT NULL,
+	id_producto_fk INTEGER REFERENCES producto (id_producto) UNIQUE
+);
+
+SELECT * FROM producto;
+SELECT * FROM codigo_de_barras;
+
+INSERT INTO producto (nombre, precio) VALUES ('Coca-Cola', 18.50);
+INSERT INTO producto (nombre, precio) VALUES ('Sabritas de Limon', 15.32);
+INSERT INTO producto (nombre, precio) VALUES ('Galletas Oreo', 30.20);
+INSERT INTO producto (nombre, precio) VALUES ('Fabuloso', 33.8);
+
+INSERT INTO codigo_de_barras (codigo, id_producto_fk) VALUES ('12345', 1);
+INSERT INTO codigo_de_barras (codigo, id_producto_fk) VALUES ('67892', 2);
+INSERT INTO codigo_de_barras (codigo, id_producto_fk) VALUES ('33214', 3);
+INSERT INTO codigo_de_barras (codigo, id_producto_fk) VALUES ('48644', 4);
+
+
+--  ************************ 1 --- N ******************************************************
+
+CREATE TABLE usuario (
+	id_usuario SERIAL PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL,
+	email VARCHAR(40) DEFAULT 'no indicado'
+);
+
+CREATE TABLE pedido(
+	id_pedido SERIAL PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL,
+	contenido VARCHAR(250) NOT NULL,
+	id_usuario_fk INTEGER REFERENCES usuario (id_usuario)
+);
+
+SELECT * FROM usuario;
+SELECT * FROM pedido;
+
+INSERT INTO usuario (nombre, email) VALUES ('Jason', 'jason@email.com');	-- 3 pedidos
+INSERT INTO usuario (nombre, email) VALUES ('Mauricio', 'mau@email.com'); 	-- 3 pedidos
+INSERT INTO usuario (nombre, email) VALUES ('Giovani', 'gio@email.com'); 	-- 1 pdido
+
+
+INSERT INTO pedido (nombre, contenido, id_usuario_fk) VALUES ('Videojuego','PlayStation 5',1);
+INSERT INTO pedido (nombre, contenido, id_usuario_fk) VALUES ('Perfumeria','Mercedes-Benz',1);
+INSERT INTO pedido (nombre, contenido, id_usuario_fk) VALUES ('Tecnologia','IPad Air',1);
+
+INSERT INTO pedido (nombre, contenido, id_usuario_fk) VALUES ('Tecnologia','MacBook Pro 2022',2);
+INSERT INTO pedido (nombre, contenido, id_usuario_fk) VALUES ('Videjuego','Sekiro',2);
+INSERT INTO pedido (nombre, contenido, id_usuario_fk) VALUES ('Papeleria','Cuadernillo A4',2);
+
+INSERT INTO pedido (nombre, contenido, id_usuario_fk) VALUES ('Jugueteria','Funko Pop Silvestre',3);
 
 
 
+-- ************************  N --- N ******************************************************
+
+CREATE TABLE alumno (
+	id_alumno SERIAL PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL,
+	apellido VARCHAR(30) NOT NULL,
+	matricula VARCHAR(5) NOT NULL
+);
 
 
+CREATE TABLE profesor (
+	id_profesor SERIAL PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL,
+	materia VARCHAR(30) NOT NULL
+);
 
 
+CREATE TABLE alumno_profesor(
+	id_alumno_profesor SERIAL PRIMARY KEY,
+	id_alumno_fk INTEGER REFERENCES alumno (id_alumno),
+	id_profesor_fk INTEGER REFERENCES profesor (id_profesor)
+);
 
+SELECT * FROM alumno;
+SELECT * FROM profesor;
+SELECT * FROM alumno_profesor;
+
+
+-- Insertar 7 alumnos y 3 profsores
+
+INSERT INTO alumno (nombre, apellido, matricula) VALUES 
+					('Renato', 'Carsey', '12345'),
+					('Dawna','Smowton','54321'),
+					('Madelyn','Lage','56789'),
+					('Omar','Bickerdyke','98765'),
+					('Layton','Yurikov','44354'),
+					('Griffy','Godleman','88876'),
+					('Saul','Goodman','99987');
+
+
+INSERT INTO profesor (nombre, materia) VALUES 
+					('Dalton', 'Ciencia de datos'),
+					('Silvestre', 'Calculo integral'),
+					('Aleece', 'Base de Datos');
+
+INSERT INTO alumno_profesor (id_alumno_fk, id_profesor_fk) VALUES 
+							(1,1),
+							(2,1),
+							(3,1),
+							(4,2),
+							(5,2),
+							(6,3),
+							(7,3);
+
+
+-- Hasta este punto podemos aprendimos a como relacionar nuestras tablas usando codigo
+-- Ahora en adelante aprenderemos de JOINS es un tema con mayor complejidad y estamos por cerrar el curso
+
+
+-- JOINS
 
 
