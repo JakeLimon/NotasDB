@@ -482,6 +482,55 @@ INSERT INTO alumno_profesor (id_alumno_fk, id_profesor_fk) VALUES
 -- Ahora en adelante aprenderemos de JOINS es un tema con mayor complejidad y estamos por cerrar el curso
 
 
--- JOINS
 
+-- JOINS
+-- 1.- Inner Join
+-- 		Inner joins es una manera efectiva con la cual conbinamos dos tablas, tomemos como ejemplo que
+--		tenemos la tabla A y la tabla B entonces con un inner join vamos a obtner un C
+--		podemos decir que es A + B = C
+-- 		algo mas grafico cada tablas es un circulo y si se unen nos mostrar la parte donde se unen ambos ciculos
+
+-- Hagamos un ejemplo con nuestra relacion uno a uno primero
+
+SELECT * FROM producto INNER JOIN codigo_de_barras ON producto.id_producto = codigo_de_barras.id_producto_fk;
+
+-- Ahora hagamso el mismo INNER JOIN pero solo con las columnas de producto nombre precio y del codigo de barras solo el codigo
+
+SELECT p.nombre AS "Producto", p.precio AS "Precio", c.codigo AS "Codigo de barras" FROM producto AS p 
+JOIN codigo_de_barras AS c ON p.id_producto = c.id_producto_fk ORDER BY (p.precio) DESC;
+
+-- Primera observacion es que como es un inner join podemos omitir la palabra inner
+-- Agregamos alias para poder identificar cada tabla
+-- Se agrego alias para mostrar un nombre diferente de columna
+
+
+-- Como ejercicio hacer un Inner Join con las tablas de relacion uno a muchos usuario pedido, primero sencillo y luego con columnas
+-- en especifico
+
+SELECT * FROM usuario INNER JOIN pedido ON usuario.id_usuario = pedido.id_usuario_fk;
+
+SELECT u.id_usuario AS "Id de usuario", u.nombre AS "Nombre", p.nombre AS "Categoria", p.contenido As "Pedido" FROM usuario AS u 
+INNER JOIN pedido AS p ON u.id_usuario = p.id_usuario_fk;
+
+
+-- 2.- LEFT JOIN
+-- 		Es la union de dos tablas pero mostrara la tbala de lado izquiero y las coincidencias de mi tabla B pero en caso
+-- 		Que no tengan un relacion aun asi los mostrara pero los cambios los mostrara en blanco
+
+SELECT * FROM producto AS p LEFT JOIN codigo_de_barras AS c ON p.id_producto = c.id_producto_fk;
+
+-- Como practica hacer un LEFT JOIN pero con las relaciones uno a muchos usuario pedido
+SELECT * FROM usuario AS u LEFT JOIN pedido AS p ON u.id_usuario = p.id_usuario_fk;
+
+
+-- 3.- RIGHT JOIN
+-- 		Practicamente es lo mismo que un Left Join pero con las clausula que es todo lo contrario en lugar de ir a la izquierda
+-- 		ahora iremos hacia la derecha
+
+SELECT * FROM producto AS p RIGHT JOIN codigo_de_barras AS b ON p.id_producto = b.id_producto_fk;
+
+
+-- 4.- FULL JOIN Practicamente es la union de una left join y una right join
+
+SELECT * FROM producto AS p FULL JOIN codigo_de_barras AS b ON p.id_producto = b.id_producto_fk;
 
