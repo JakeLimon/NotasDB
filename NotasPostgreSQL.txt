@@ -534,3 +534,75 @@ SELECT * FROM producto AS p RIGHT JOIN codigo_de_barras AS b ON p.id_producto = 
 
 SELECT * FROM producto AS p FULL JOIN codigo_de_barras AS b ON p.id_producto = b.id_producto_fk;
 
+
+
+-- Sub consulta es para poder traer un valor en especifico o algo que necesito de otra tabla o incluso de la misma
+SELECT MAX(precio) FROM producto;
+SELECT MIN(precio) FROM producto;
+SELECT * FROM producto WHERE precio >= ( SELECT MAX(precio) FROM producto );
+-- Aqui simulamos un a oferta del dia donde vamos a extraer el precio minimo y lo vamos a restar con el precio actual
+-- asi como vamos a mostrar el precio orginal y el precio de la oferta
+SELECT nombre, precio, precio - (SELECT MIN(precio) FROM producto) AS "Oferta del dia" FROM producto ORDER BY "Oferta del dia";
+
+
+
+
+
+-- Ahora vamos con los TRIGGERS, que estos son funciones que se ejecutan ANTES o DESPUES de 
+-- INSERTAR, ACTUALIZAR o ELIMINAR algo de una tabla, algo asi como tener un respaldo
+-- Para este ejemplo debemos crear la tabla donde guardaremos dicha informacion 
+-- posterios a eso vamos a crear la funcion y al final el trigger
+-- y vamos hacer un ejemplo de cada uno cada funcion de un CRUD menos el READ.
+-- esto se aplicara a la tabla de producto ya que ahi es donde podemos dejar mas claro el funcionamiento de un trigger
+
+
+-- Comenzamos con la tabla, como sera la de producto vamos a compiar los mismos cambios para tener un respaldo de los datos
+-- antes de ser cambiados
+SELECT * FROM producto;
+-- La llamaremos log_producto
+
+CREATE TABLE log_producto(
+	log_producto SERIAL PRIMARY KEY,
+	id_producto INTEGER NOT NULL,
+	nombre VARCHAR(30) NOT NULL,
+	precio DECIMAL(5,2) NOT NULL
+);
+
+SELECT * FROM log_producto;
+
+-- ya que tenemos la tbala procederemos a relizar la funcion la cual lleva una sintaxis
+
+-- CREATE FUNCTION nombre_funcion() RETURNS TRIGGER AS $$
+-- BEGIN
+--	  Aqui va todo el codio a ejecutar
+-- END
+-- $$ LANGUAGE plpgsql;
+
+
+-- Vamos a crar un trigger para guardar los datos anteriors a la modificacion que vamos a aplicar a la tabla asi que...
+CREATE FUNCTION update_producto () RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO log_producto (id_producto, nombre, precio) VALUES (old.id_producto, old.nombre, old.precio);
+	RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+-- solo ejecutamos nuestra funcion para guardarla
+-- Ahora podemos proceder a crear el trigger como tal para cuando se actulize un producto en mi tabla producto
+-- este trigger se activara antes de hacer la funcion del update
+
+CREATE TRIGGER tr_update BEFORE UPDATE ON producto
+FOR EACH ROW 
+EXECUTE PROCEDURE update_producto();
+
+-- Lo que estamos diciendo es que aplicaremos el trigger antes de hacer un pdate a mi tabla producto
+-- solo ejecutamos el trigger para guardarlo 
+
+-- Ahora para verificar nuestros updates con el trigger vamos a cambiar el registro de sarbtas de limon
+-- por sabritas de habanero con un precio diferente
+UPDATE producto SET nombre = 'Sabritas Habanero', precio = 19.45 WHERE id_producto = 2;
+-- Ya ejecutado nuestro update vamos a verificar el cambio realizado asi como nuestra tabla donde guardamos
+-- los valores antiguos como respaldo.
+SELECT * FROM producto;
+SELECT * FROM log_producto;
+-- asi es como creamos un trigger, ahora como repaso y tarea realizar lo striggers para nbuesvos registros y eliminados
+
