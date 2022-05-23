@@ -606,3 +606,67 @@ SELECT * FROM producto;
 SELECT * FROM log_producto;
 -- asi es como creamos un trigger, ahora como repaso y tarea realizar lo striggers para nbuesvos registros y eliminados
 
+
+-- Voy a crear la tabla donde eliminare los productos de mi tabla
+SELECT * FROM producto;
+
+CREATE TABLE log_delete_producto(
+	id_log_delete_producto SERIAL PRIMARY KEY,
+	id_producto INTEGER NOT NULL,
+	nombre VARCHAR(30) NOT NULL,
+	precio DECIMAL(5,2) NOT NULL
+);
+SELECT * FROM log_delete_producto;
+
+
+CREATE FUNCTION delete_producto () RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO log_delete_producto (id_producto, nombre, precio) 
+	VALUES (old.id_producto, old.nombre, old.precio);
+	RETURN OLD;
+END
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER tr_delete_producto BEFORE DELETE ON producto
+FOR EACH ROW 
+EXECUTE PROCEDURE delete_producto();
+
+
+DELETE FROM producto WHERE id_producto = 5;
+
+SELECT * FROM producto;
+SELECT * FROM log_delete_producto;
+
+-- Aqui como podemos ver es que necesitamos retornar en nuestra funcion un OLD para poder crear este trigger
+-- Ahora vamos a crear un trigger para cando insertemos un nuevo valor
+
+-- como sabemos como primer paso vamos crear la tabla para guardar tambien los nuevos registros
+SELECT * FROM producto;
+SELECT * FROM log_insert_producto;
+
+CREATE TABLE log_insert_producto(
+	id_insert_producto SERIAL PRIMARY KEY,
+	id_producto INTEGER NOT NULL,
+	nombre VARCHAR(30) NOT NULL,
+	precio DECIMAL(5,2) NOT NULL
+);
+
+
+CREATE FUNCTION insert_producto () RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO log_insert_producto (id_producto, nombre, precio) VALUES (new.id_producto, new.nombre, new.precio);
+	RETURN NEW;
+END 
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER tr_insert_producto AFTER INSERT ON producto
+FOR EACH ROW
+EXECUTE PROCEDURE insert_producto();
+
+INSERT INTO producto (nombre, precio) VALUES ('Chipotles Barcel', 14.68);
+
+-- Aqui como podemos ver usamos el after ya que es despues de insertar en la tabla vmaos a insertar el respaldo en 
+-- la tabla llamada log_insert_producto asi que ya quedo, tambien vemos que retornamos un new 
+
